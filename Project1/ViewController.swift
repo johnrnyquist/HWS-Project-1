@@ -14,28 +14,22 @@ class ViewController: UITableViewController {
         title = "Storm Viewer" // set the title
         navigationController?.navigationBar.prefersLargeTitles = true // big titles
         
-        let fm = FileManager.default // get a filemanger
-        let path = Bundle.main.resourcePath! //We can be sure iOS has a bundle
-        let items = try! fm.contentsOfDirectory(atPath: path) //We can be sure the bundle directory has contents
-        
-//        for item in items {
-//            print(item)
-//            if item.hasPrefix("nssl") {
-//                // this is a picture to load!
-//                print("   adding picture")
-//                pictures.append(item)
-//            }
-//        }
-//        print("unsorted \(pictures)")
-        pictureNames = items
-            .filter { $0.hasPrefix("nssl") }
-            .sorted { $0 < $1 }
-//        pictures.sort() { $0 < $1 }
-//        print("sorted \(pictures)")
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            let fm = FileManager.default // get a filemanger
+            let path = Bundle.main.resourcePath! //We can be sure iOS has a bundle
+            let items = try! fm.contentsOfDirectory(atPath: path) //We can be sure the bundle directory has contents
+            
+            self?.pictureNames = items
+                .filter { $0.hasPrefix("nssl") }
+                .sorted { $0 < $1 }
+            
+            DispatchQueue.main.async { [weak self] in
+                self?.tableView.reloadData()
+            }
+        }
         
         // .action is the box with the arrow coming out
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .action, target: self, action: #selector(shareTapped))
-
     }
     
     
